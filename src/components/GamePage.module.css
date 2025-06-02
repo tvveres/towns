@@ -33,7 +33,7 @@
 }
 
 .timerText {
-  font-size: 2.5rem;
+  font-size: 4rem;
   fill: var(--primary-green);
   font-weight: bold;
   animation: pulse 1s infinite;
@@ -126,20 +126,19 @@
 }
 
 .tryAgainButton {
-  font-size: 1.8rem;
-  padding: 1.2rem 3.5rem;
-  border: none;
+  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 50px;
-  background: linear-gradient(135deg, var(--primary-purple), var(--primary-green));
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  animation: fadeInUp 0.5s ease-out 0.4s both;
+  transition: all 0.3s ease;
 }
 
 .tryAgainButton:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 @keyframes pulse {

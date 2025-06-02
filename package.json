@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@salutejs/client": "^1.35.9",
+    "@sberdevices/assistant-client": "^5.0.2",
     "@types/node": "^22.15.24",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

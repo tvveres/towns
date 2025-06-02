@@ -9,6 +9,7 @@ type Page = 'start' | 'rules' | 'game';
 export const App: React.FC = () => {
   console.log('App component rendering');
   const [currentPage, setCurrentPage] = useState<Page>('start');
+  const [lastCity, setLastCity] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('App component mounted');
@@ -22,18 +23,20 @@ export const App: React.FC = () => {
   const handlePlayClick = () => {
     console.log('Play button clicked');
     setCurrentPage('game');
+    setLastCity(null);
   };
 
   const handleGameEnd = () => {
     console.log('Game ended');
     setCurrentPage('start');
+    setLastCity(null);
   };
 
   return (
     <div className="app">
       {currentPage === 'start' && <StartPage onStart={handleStartClick} />}
       {currentPage === 'rules' && <RulesPage onPlay={handlePlayClick} />}
-      {currentPage === 'game' && <GamePage onGameEnd={handleGameEnd} />}
+      {currentPage === 'game' && <GamePage onGameEnd={handleGameEnd} lastCity={lastCity} />}
     </div>
   );
 }; 
