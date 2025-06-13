@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styles from './StartPage.module.css';
 
 interface StartPageProps {
@@ -6,11 +6,6 @@ interface StartPageProps {
 }
 
 export const StartPage: React.FC<StartPageProps> = ({ onStart }) => {
-  useEffect(() => {
-    console.log('StartPage mounted');
-    console.log('Styles:', styles);
-  }, []);
-
   return (
     <div className={styles.startContainer}>
       <h1 className={styles.title}>Игра в города</h1>

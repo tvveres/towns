@@ -3,11 +3,15 @@ import styles from './RulesPage.module.css';
 
 interface RulesPageProps {
   onPlay: () => void;
+  onBack: () => void;
 }
 
-export const RulesPage: React.FC<RulesPageProps> = ({ onPlay }) => {
+export const RulesPage: React.FC<RulesPageProps> = ({ onPlay, onBack }) => {
   return (
     <div className={styles.rulesContainer}>
+      <button onClick={onBack} className={styles.backButton}>
+        ←
+      </button>
       <h2 className={styles.rulesTitle}>Правила игры</h2>
       <div className={styles.rulesList}>
         <div className={styles.rule}>

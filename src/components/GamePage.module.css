@@ -4,9 +4,15 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  width: 100%;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d1f3d 100%);
   padding: 2rem;
   gap: 3rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .timerContainer {
@@ -18,6 +24,7 @@
 .timerSvg {
   width: 100%;
   height: 100%;
+  transform: rotate(-90deg);
 }
 
 .timerBackground {
@@ -28,8 +35,6 @@
   transition: stroke-dashoffset 1s linear;
   animation: pulse 1s infinite;
   transform-origin: center;
-
-  transform: rotate(-90deg);
 }
 
 .timerText {
@@ -39,7 +44,7 @@
   animation: pulse 1s infinite;
   dominant-baseline: middle;
   text-anchor: middle;
-  transform-box: fill-box;
+  transform: rotate(90deg);
   transform-origin: center;
 }
 
@@ -104,10 +109,16 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  width: 100%;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d1f3d 100%);
   padding: 2rem;
   gap: 2rem;
   text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .gameOverTitle {
@@ -126,33 +137,30 @@
 }
 
 .tryAgainButton {
+  padding: 1rem 3rem;
   font-size: 1.2rem;
-  padding: 0.8rem 2rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 .tryAgainButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--primary-green-dark);
+  transform: scale(1.05);
 }
 
 @keyframes pulse {
   0% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
     opacity: 0.8;
-    transform: scale(1.02);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -174,4 +182,61 @@
   to {
     opacity: 1;
   }
+}
+
+.confirmDialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirmDialogContent {
+    background-color: var(--background-primary);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+}
+
+.confirmDialogContent p {
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    font-size: 16px;
+}
+
+.confirmDialogButtons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.confirmDialogButtons button {
+    padding: 8px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmDialogButtons button:first-child {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.confirmDialogButtons button:last-child {
+    background-color: var(--background-secondary);
+    color: var(--text-primary);
+}
+
+.confirmDialogButtons button:hover {
+    opacity: 0.9;
 } 

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './GamePage.module.css';
 import { AssistantAppState } from '@sberdevices/assistant-client';
-import { initialize } from '../config';
+import { CitiesGame } from '../utils/gameLogic';
 
 interface GamePageProps {
   onGameEnd: () => void;
   lastCity: string | null;
+  assistant: any;
+  setTimeLeft: (time: number) => void;
 }
 
 interface GameEndState {
@@ -22,75 +24,32 @@ type AssistantCommand = {
   };
 };
 
-export const GamePage: React.FC<GamePageProps> = ({ onGameEnd }) => {
-  const [timeLeft, setTimeLeft] = useState(30);
+export const GamePage: React.FC<GamePageProps> = ({ 
+  onGameEnd, 
+  lastCity: initialLastCity,
+  assistant,
+  setTimeLeft 
+}) => {
+  const [timeLeft, setLocalTimeLeft] = useState(30);
   const [message, setMessage] = useState('');
   const [lastBotCity, setLastBotCity] = useState<string>('');
   const [gameEnd, setGameEnd] = useState<GameEndState>({ isEnded: false, winner: null });
   const [inputCity, setInputCity] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const timerRef = useRef<number | null>(null);
-  const assistantRef = useRef(initialize(() => ({
-    timeLeft,
-    lastCity: lastBotCity
-  })));
+  const gameRef = useRef(new CitiesGame());
 
-  // Инициализация ассистента
-  useEffect(() => {
-    const assistant = assistantRef.current;
-
-    assistant.on('data', (command: unknown) => {
-      const { type, payload } = command as AssistantCommand;
-      switch (type) {
-        case 'invalid_move':
-          setMessage(payload.message || '');
-          break;
-        case 'bot_move':
-          if (payload.city) {
-            setLastBotCity(payload.city);
-            setTimeLeft(30);
-          }
-          break;
-        case 'game_end':
-          if (payload.winner) {
-            handleGameEnd(payload.winner);
-          }
-          break;
-        case 'game_reset':
-          setMessage(payload.message || '');
-          setTimeLeft(30);
-          setLastBotCity('');
-          break;
-        case 'hint':
-          setMessage(payload.message || '');
-          break;
-      }
-    });
-
-    // Отправляем начальное состояние
-    assistant.sendData({
-      action: {
-        type: 'start_game',
-        payload: {}
-      }
-    });
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, []);
-
-  // Таймер
+  // Timer effect
   useEffect(() => {
     timerRef.current = window.setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
+      setLocalTimeLeft((prev) => {
+        const newTime = prev <= 1 ? 0 : prev - 1;
+        setTimeLeft(newTime);
+        if (newTime === 0) {
           clearInterval(timerRef.current!);
           handleGameEnd('bot');
-          return 0;
         }
-        return prev - 1;
+        return newTime;
       });
     }, 1000);
 
@@ -108,24 +67,104 @@ export const GamePage: React.FC<GamePageProps> = ({ onGameEnd }) => {
     }
   };
 
+  const handleConfirmGameEnd = () => {
+    setShowConfirmDialog(false);
+    onGameEnd();
+  };
+
+  const handleCancelGameEnd = () => {
+    setShowConfirmDialog(false);
+  };
+
+  const handleTryAgainClick = () => {
+    setShowConfirmDialog(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const city = inputCity.trim();
     
     if (!city) return;
 
-    assistantRef.current.sendData({
-      action: {
-        type: 'player_move',
-        payload: { city }
-      }
-    });
+    const result = gameRef.current.makeMove(city);
+    
+    if (!result.isValid) {
+      setMessage(result.message || 'Неверный ход');
+      return;
+    }
+
+    if (result.gameOver) {
+      handleGameEnd('player');
+      return;
+    }
+
+    if (result.botCity) {
+      setLastBotCity(result.botCity);
+      setMessage('');
+      setLocalTimeLeft(30);
+      setTimeLeft(30);
+    }
 
     setInputCity('');
   };
 
+  const resetGame = () => {
+    gameRef.current.resetGame();
+    const botCity = gameRef.current.makeBotFirstMove();
+    setMessage('');
+    setLocalTimeLeft(30);
+    setTimeLeft(30);
+    setLastBotCity(botCity);
+    setInputCity('');
+  };
+
+  // Assistant command handler
+  useEffect(() => {
+    const handleAssistantCommand = (command: AssistantCommand) => {
+      const { type, payload } = command;
+      switch (type) {
+        case 'reset_game':
+          resetGame();
+          break;
+        case 'invalid_move':
+          setMessage(payload.message || '');
+          break;
+        case 'bot_move':
+          if (payload.city) {
+            setLastBotCity(payload.city);
+            setLocalTimeLeft(30);
+            setTimeLeft(30);
+          }
+          break;
+        case 'game_end':
+          if (payload.winner) {
+            handleGameEnd(payload.winner);
+          }
+          break;
+      }
+    };
+
+    if (assistant && typeof assistant.on === 'function') {
+      assistant.on('data', handleAssistantCommand);
+    }
+
+    return () => {
+      if (assistant && typeof assistant.off === 'function') {
+        assistant.off('data', handleAssistantCommand);
+      }
+    };
+  }, [assistant]);
+
   const calculateTimerProgress = () => {
     return ((30 - timeLeft) / 30) * 628.32;
+  };
+
+  const getLastLetterForPrompt = (city: string): string => {
+    let lastChar = city.slice(-1).toUpperCase();
+    if (lastChar === 'Ь' || lastChar === 'Ъ') {
+      lastChar = city.slice(-2, -1).toUpperCase();
+    }
+    return lastChar;
   };
 
   if (gameEnd.isEnded) {
@@ -139,9 +178,21 @@ export const GamePage: React.FC<GamePageProps> = ({ onGameEnd }) => {
             ? 'Поздравляем! Бот не смог найти подходящий город.' 
             : 'Время вышло или вы не смогли назвать город.'}
         </p>
-        <button className={styles.tryAgainButton} onClick={onGameEnd}>
+        <button className={styles.tryAgainButton} onClick={handleTryAgainClick}>
           Играть снова
         </button>
+
+        {showConfirmDialog && (
+          <div className={styles.confirmDialog}>
+            <div className={styles.confirmDialogContent}>
+              <p>Вы уверены, что хотите начать новую игру?</p>
+              <div className={styles.confirmDialogButtons}>
+                <button onClick={handleConfirmGameEnd}>Да</button>
+                <button onClick={handleCancelGameEnd}>Нет</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -176,7 +227,9 @@ export const GamePage: React.FC<GamePageProps> = ({ onGameEnd }) => {
         </svg>
       </div>
 
-      <h1 className={styles.prompt}>Игра в города</h1>
+      <h1 className={styles.prompt}>
+        {lastBotCity ? `Ваш ход! Назовите город на букву "${getLastLetterForPrompt(lastBotCity)}"` : 'Назовите любой город'}
+      </h1>
       
       <div className={styles.inputContainer}>
         {message && <p className={styles.message}>{message}</p>}
@@ -200,14 +253,9 @@ export const GamePage: React.FC<GamePageProps> = ({ onGameEnd }) => {
         
         <button 
           className={styles.tryAgainButton} 
-          onClick={() => assistantRef.current.sendData({ 
-            action: { 
-              type: 'reset_game',
-              payload: {}
-            } 
-          })}
+          onClick={resetGame}
         >
-          Закончить игру
+          Начать заново
         </button>
       </div>
     </div>

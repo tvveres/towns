@@ -3,12 +3,20 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d1f3d 100%);
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.app.fade {
+  opacity: 0;
 }
 
 :root {
   --primary-purple: #8a2be2;
-  --primary-green: #50c878;
+  --primary-green: #30b956;
+  --primary-green-dark: #259544;
   --text-primary: #ffffff;
 }
 
@@ -22,4 +30,5 @@ body {
   font-family: 'Roboto', sans-serif;
   color: var(--text-primary);
   background: #1a1a1a;
+  overflow: hidden;
 } 

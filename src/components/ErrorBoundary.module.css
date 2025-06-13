@@ -1,0 +1,39 @@
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1f3d 100%);
+  color: white;
+}
+
+.errorContainer h1 {
+  font-size: 2.5rem;
+  color: var(--primary-green);
+  margin-bottom: 1rem;
+}
+
+.errorContainer p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.reloadButton {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.reloadButton:hover {
+  background: var(--primary-green-dark);
+  transform: scale(1.05);
+} 
